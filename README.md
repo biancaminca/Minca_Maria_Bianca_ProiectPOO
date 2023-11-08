@@ -54,6 +54,18 @@ public:
 		}
 	}
 
+	Mobila& operator=(const Mobila& m) {
+		if (this != &m) {
+			this->nrSertare = m.nrSertare;
+			if (this->culoare)
+				delete[] this->culoare;
+			this->culoare = new char[strlen(m.culoare) + 1];
+			strcpy_s(this->culoare, strlen(m.culoare) + 1, m.culoare);
+			this->material = m.material;
+		}
+		return *this;
+	}
+
 
 	int getId() {
 		return id;
@@ -96,6 +108,29 @@ public:
 	}
 
 	friend void emitereFactura(Mobila m);
+
+	friend ostream& operator<<(ostream& os, const Mobila& mobila) {
+		os << "Mobila cu id-ul " << mobila.id << " are " << mobila.nrSertare << " sertare, este de culoare " << mobila.culoare << " si este din " << mobila.material << ". Mobila este in garantie pentru " << Mobila::garantie << " ani" << endl;
+		return os;
+	}
+
+	bool operator&&(const Mobila& m) {
+		return this->nrSertare == m.nrSertare && this->material == m.material;
+	}
+
+	Mobila& operator +=(int nrSertare) {
+		this->nrSertare += nrSertare;
+		return *this;
+	}
+
+	int operator()()  {
+		return garantie;
+	}
+
+	Mobila& operator+=(const Mobila& m) {
+		this->nrSertare += m.nrSertare;
+		return *this;
+	}
 };
 int Mobila::garantie = 5;
 void emitereFactura(Mobila m) {
@@ -125,7 +160,7 @@ public:
 		strcpy_s(this->nume, strlen("Popescu") + 1, "Popescu");
 		this->varsta = 38;
 		this->aniVechime = 15;
-		this->eBarbat = false;
+		this->eBarbat = true;
 	}
 
 	Angajat(const char* nume, int varsta) : id(278)
@@ -134,18 +169,28 @@ public:
 		strcpy(this->nume, nume);
 		this->varsta = varsta;
 		this->aniVechime = 10;
-		this->eBarbat = false;
+		this->eBarbat = true;
 
 	}
 	Angajat(int id, int aniVechime) :id(id)
 	{
-		this->nume = new char[strlen("Bianca Maria") + 1];
-		strcpy_s(this->nume, strlen("Bianca Maria") + 1, "Bianca Maria");
+		this->nume = new char[strlen("Angajatul X") + 1];
+		strcpy_s(this->nume, strlen("Angajatul X") + 1, "Angajatul X");
 		this->varsta = 55;
 		this->aniVechime = aniVechime;
 		this->eBarbat = true;
 
 	}
+	Angajat(int id, const char* nume, int varsta, int aniVechime, bool eBarbat) :id(id)
+	{
+		this->nume = new char[strlen(nume) + 1];
+		strcpy(this->nume, nume);
+		this->varsta = varsta;
+		this->aniVechime = aniVechime;
+		this->eBarbat = eBarbat;
+
+	}
+	
 
 	void afisare() {
 		cout << "Angajatul cu numele de " << nume << " in varsta de " << varsta << ", are " << aniVechime << " ani vechime si  " << (this->eBarbat ? "e Barbat" : "e Femeie") << endl;
@@ -165,6 +210,20 @@ public:
 		if (this->nume != NULL) {
 			delete[]this->nume;
 		}
+	}
+
+	Angajat& operator=(const Angajat& a) {
+		if (this != &a) {
+			if (this->nume != NULL) {
+				delete[]this->nume;
+			}
+			this->nume = new char[strlen(a.nume) + 1];
+			strcpy_s(this->nume, strlen(a.nume) + 1, a.nume);
+			varsta = a.varsta;
+			aniVechime = a.aniVechime;
+			eBarbat = a.eBarbat;
+		}
+		return *this;
 	}
 
 	const int getId() {
@@ -214,6 +273,35 @@ public:
 	static void setVarstaPensionare(int varstaPensionare) {
 		Angajat::varstaPensionare = varstaPensionare;
 	}
+
+	explicit operator int() {
+		return (this->eBarbat ? 65 - varsta : 60 - varsta);
+	}
+
+	friend ostream& operator<<(ostream& os, const Angajat& angajat) {
+		os << "Angajatul cu numele de " << angajat.nume << " in varsta de " << angajat.varsta << ", are " << angajat.aniVechime << " ani vechime si " << (angajat.eBarbat ? "e Barbat" : "e Femeie");
+		return os;
+	}
+
+	Angajat operator+(const Angajat& a)  {
+		Angajat copie = *this;
+		copie.aniVechime += a.aniVechime;
+		return copie;
+	}
+
+	Angajat& operator-=(int ani) {
+		this->aniVechime -= ani;
+		return *this;
+	}
+
+	bool operator>(const Angajat& a)  {
+		return aniVechime > a.aniVechime;
+	}
+
+	int operator()() {
+		return this->varsta;
+	}
+
 };
 
 int Angajat::varstaPensionare = 65;
@@ -295,6 +383,24 @@ public:
 		}
 	}
 
+	Fabrica& operator=(const Fabrica& f) {
+		if (this != &f) {
+			this->locatie = new char[strlen(f.locatie) + 1];
+			strcpy_s(this->locatie, strlen(f.locatie) + 1, f.locatie);
+			this->suprafata = f.suprafata;
+			this->nrAngajati = f.nrAngajati;
+			if (this->numeAngajati) {
+				delete[] this->numeAngajati;
+			}
+			this->numeAngajati = new string[nrAngajati];
+			for (int i = 0; i < this->nrAngajati; i++) {
+				this->numeAngajati[i] = f.numeAngajati[i];
+			}
+		}
+		return *this;
+	}
+
+
 	const int getAnInfiintare() {
 		return anInfiintare;
 	}
@@ -347,6 +453,50 @@ public:
 	}
 
 	friend void afisareRaport(Fabrica f);
+
+	friend ostream& operator<<(ostream& os, const Fabrica& fab) {
+		os << "An infiintare: " << fab.anInfiintare << ", Locatie: " << fab.locatie << ", Suprafata: " << fab.suprafata << " mp, Numar angajati: " << fab.nrAngajati << ", Nume angajati: ";
+		for (int i = 0; i < fab.nrAngajati; i++) {
+			os << fab.numeAngajati[i];
+			if (i < fab.nrAngajati - 1) {
+				os << ", ";
+			}
+		}
+		os << ", Total fabrici: " << fab.nrTotalFabrici;
+		return os;
+	}
+
+	Fabrica& operator+=( string numeAngajat) {
+		string* noiNumeAngajati = new string[nrAngajati + 1];
+		for (int i = 0; i < this->nrAngajati; i++) {
+			noiNumeAngajati[i] = this->numeAngajati[i];
+		}
+		noiNumeAngajati[nrAngajati] = numeAngajat;
+		this->nrAngajati++;
+		if (this->numeAngajati) {
+			delete[] numeAngajati;
+		}
+		this->numeAngajati = noiNumeAngajati;
+		return *this;
+	}
+
+	string& operator[](int index) {
+		if (index >= 0 && index < nrAngajati) {
+			return numeAngajati[index];
+		}
+		else {
+			string nume = "Nu e niciun nume acolo!";
+			return nume;
+		}
+	}
+
+	bool operator==(const Fabrica& f)  {
+		return (anInfiintare == f.anInfiintare && nrAngajati == f.nrAngajati);
+	}
+
+	bool operator!()  {
+		return nrAngajati == 0;
+	}
 };
 int Fabrica::nrTotalFabrici = 1;
 
@@ -415,7 +565,7 @@ void main()
 	cout << endl;
 
 	string angajati[] = { "Ionel","Dorel","Mihaela" };
-	Fabrica fabrica3(25, "Buzau", 257, 3, angajati);
+	Fabrica fabrica3(2005, "Buzau", 257, 3, angajati);
 	fabrica3.afisare();
 	cout << endl;
 
@@ -520,7 +670,7 @@ void main()
 	cout << endl << endl << endl << endl;
 	cout << "---------------------------------------" << endl;
 	cout << endl;
-	
+
 	cout << "CONSTRUCTOR DE COPIERE CLASA MOBILA:" << endl;
 	Mobila mobila4 = mobila3;
 	mobila4.afisare();
@@ -548,11 +698,121 @@ void main()
 	cout << endl << endl << endl << endl;
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
-	cout << "FUNCTII GLOBALE(CU FRIEND):"<<endl;
+	cout << "FUNCTII GLOBALE(CU FRIEND):" << endl;
 	emitereFactura(mobila4);
 	cout << endl << endl;
 	cout << endl << endl;
 
 	afisareRaport(fabrica4);
 	cout << endl << endl;
+
+	cout << endl << endl << endl << endl;
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << "OPERATORI CLASA MOBILA:" << endl;
+	Mobila mobila5;
+	cout << mobila5 << endl;
+	mobila5 = mobila3;
+	cout << mobila5 << endl;
+	cout << mobila3 << endl;
+	cout << mobila2 << endl;
+
+	cout << endl;
+
+	cout << (mobila5 && mobila5) << endl;
+	cout << (mobila5 && mobila3) << endl;
+	cout << (mobila5 && mobila2) << endl;
+	cout << endl;
+
+	mobila5 += 41;
+	cout << mobila5 << endl;
+	cout << endl;
+
+	mobila5 += mobila2;
+	cout << mobila5 << endl;
+	cout << endl;
+
+	cout << mobila5() << endl;
+	cout << mobila2() << endl;
+	cout << endl;
+
+	cout << endl << endl << endl << endl;
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << "OPERATORI CLASA ANGAJAT:" << endl;
+	Angajat angajat5(43, "Bianca Maria", 21, 4, 0);
+	cout << angajat5 << endl;
+	cout << endl;
+
+	Angajat angajat6;
+	angajat6 = angajat3;
+	cout << angajat5 << endl;
+	cout << angajat6 << endl;
+	cout << angajat3 << endl;
+
+
+	cout << endl << endl;
+	cout << angajat5() << endl;
+	cout << angajat6() << endl;
+
+	cout << endl << endl;
+	cout << (int)angajat5 << endl;
+	cout << (int)angajat6 << endl;
+
+	cout << endl << endl;
+
+	angajat6 -= 1;
+	cout << angajat6 << endl;
+	cout << endl << endl;
+
+	Angajat angajat7;
+	angajat7 = angajat5 + angajat6;
+
+	cout << angajat5 << endl;
+	cout << angajat6 << endl;
+	cout << angajat7 << endl;
+
+	cout << endl << endl;
+
+	cout << (angajat5 > angajat6) << endl;
+	cout << (angajat7 > angajat6) << endl;
+	cout << (angajat6 > angajat5) << endl;
+	cout << (angajat6 > angajat7) << endl;
+
+	cout << endl << endl << endl << endl;
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << "OPERATORI CLASA FABRICA:" << endl;
+	Fabrica fabrica5;
+	cout << fabrica5 << endl;
+	cout << endl;
+	fabrica5 = fabrica3;
+	cout << fabrica3 << endl;
+	cout << endl;
+	cout << fabrica5 << endl;
+	cout << endl;
+
+	fabrica5 += "Bianca M M";
+	cout << fabrica5 << endl;
+
+	cout << endl;
+
+	cout << fabrica5[0] << endl;
+
+	fabrica5[0] = "Bianca Ma";
+	cout << fabrica5 << endl;
+	cout << endl;
+	cout<<(fabrica1 == fabrica5) << endl;
+	cout<<(fabrica3 == fabrica4) << endl;
+	cout<<(fabrica5 == fabrica5) << endl;
+	cout << endl;
+	Fabrica fabrica6;
+	cout << !fabrica6 << endl;
+	cout << !fabrica2 << endl;
+	cout << !fabrica3 << endl;
+	cout << !fabrica4 << endl;
+	cout << endl << endl << endl << endl;
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+
 }
