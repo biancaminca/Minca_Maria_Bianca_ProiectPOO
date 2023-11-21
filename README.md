@@ -594,6 +594,117 @@ void afisareRaport(Fabrica f) {
 }
 
 
+class Departament {
+	string denumire;
+	int nrAngajati;
+	Angajat* angajati;
+	bool areSindicat;
+public:
+	Departament() {
+		denumire = "";
+		nrAngajati = 0;
+		angajati = NULL;
+		areSindicat = 0;
+	}
+
+	Departament(const string& denumire, int nrAngajati, Angajat* angajati, bool areSindicat) {
+		this->denumire = denumire;
+		this->nrAngajati = nrAngajati;
+		this->angajati = new Angajat[nrAngajati];
+		for (int i = 0; i < nrAngajati; ++i) {
+			this->angajati[i] = angajati[i];
+		}
+
+		this->areSindicat = areSindicat;
+	}
+
+	Departament(const Departament& d) {
+		this->denumire = d.denumire;
+		this->nrAngajati = d.nrAngajati;
+		this->angajati = new Angajat[d.nrAngajati];
+		for (int i = 0; i < d.nrAngajati; ++i) {
+			this->angajati[i] = d.angajati[i];
+		}
+
+		this->areSindicat = d.areSindicat;
+	}
+ // Operator de atribuire
+	Departament& operator=(const Departament& d) {
+		if (this != &d) {
+			delete[] this->angajati;
+			this->denumire = d.denumire;
+			this->nrAngajati = d.nrAngajati;
+			this->angajati = new Angajat[d.nrAngajati];
+			for (int i = 0; i < d.nrAngajati; ++i) {
+				this->angajati[i] = d.angajati[i];
+			}
+			this->areSindicat = d.areSindicat;
+		}
+		return *this;
+	}
+
+	~Departament() {
+		delete[] angajati;
+	}
+
+	friend ostream& operator<<(ostream& out, const Departament& d) {
+		out << "Denumire departament: " << d.denumire << endl;
+		out << "Numar angajati: " << d.nrAngajati << endl;
+		out << "Angajati: " << endl;
+		for (int i = 0; i < d.nrAngajati; i++) {
+			out << d.angajati[i]<<endl<<endl;
+		}
+		out << endl << endl;
+		out << "Are sindicat:(1-Da sau 0-Nu) " << d.areSindicat << endl;
+		return out;
+	}
+ string getDenumire()  {
+		return this->denumire;
+	}
+
+	void setDenumire( string denumire) {
+		this->denumire = denumire;
+	}
+
+	int getNrAngajati() {
+		return this->nrAngajati;
+	}
+
+	Angajat* getAngajat() {
+		return this->angajati;
+	}
+
+	void setAngajati(int nrAngajati, Angajat* angajati) {
+		delete[] angajati;
+		this->nrAngajati = nrAngajati;
+		this->angajati = new Angajat[nrAngajati];
+		for (int i = 0; i < nrAngajati; ++i) {
+			this->angajati[i] = angajati[i];
+		}
+	}
+
+	bool getAreSindicat() {
+		return this->areSindicat;
+	}
+
+	void setAreSindicat(bool areSindicat) {
+		this->areSindicat = areSindicat;
+	}
+Angajat operator[](int index) {
+		if (index >= 0 && index < this->nrAngajati)
+		{
+			return this->angajati[index];
+		}
+		else {
+			Angajat a;
+			return a;
+		}
+	}
+
+	explicit operator int() {
+		return this->nrAngajati;
+	}
+};
 
 
 void main()
@@ -891,63 +1002,133 @@ void main()
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
 	
+cout << "VECTOR CLASA MOBILA:" << endl;
+	Mobila* mobilaVect = new Mobila[2];
+	mobilaVect[0] = mobila2;
+	mobilaVect[1] = mobila3;
 
-	cout << "CLASA MOBILA Vector de obiecte" << endl << endl;
-	int n1;
-	cout << "Numarul de bucati de mobila este de: " << endl;
-	cin >> n1;
-	Mobila* vectorMobila= new Mobila[n1];
-	for (int i = 0; i < n1; i++) {
-		cout << " Mobila cu numarul " << (i + 1) << endl;
-		cin >> vectorMobila[i];
+	for (int i = 0; i < 2; i++) {
+		cout << mobilaVect[i] << endl;
 	}
 	cout << endl;
-	if (vectorMobila != NULL) 
-	{
-		delete[]vectorMobila;
-	}
-	
+
+	/*for (int i = 0; i < 2; i++) {
+		cin >> mobilaVect[i];
+	}*/
 
 
-	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
-	cout << "CLASA ANGAJAT Vector de obiecte" << endl << endl;
-	int n2;
-	cout << " Introduceti cati angajati noi aveti!" << endl;
-	cin >> n2;
-	Angajat* vectorAngajat = new Angajat[n2];
-	for (int i = 0; i < n2; i++) {
-		cout << "Angajatul cu numarul " << (i + 1) << endl;
-		cin >> vectorAngajat[i];
-	}
-	cout << endl;
-	if (vectorAngajat != NULL)
-	{
-		delete[]vectorAngajat;
-	}
-
-
-	cout << "---------------------------------------" << endl;
-	cout << endl << endl;
-	cout << "CLASA FABRICA Vector de obiecte" << endl << endl;
-	int n3;
-	cout << " Introduceti cate fabrici noi aveti!" << endl;
-	cin >> n3;
-	Fabrica* vectorFabrica = new Fabrica[n3];
-	for (int i = 0; i < n3; i++)
-	{
-		cout << "Fabrica cu numarul " << (i + 1) << endl;
-		cin >> vectorFabrica[i];
-	}
-	cout << endl;
-	if (vectorFabrica != NULL)
-	{
-		delete[]vectorFabrica;
+	for (int i = 0; i < 2; i++) {
+		cout << mobilaVect[i] << endl;
 	}
 
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
-	
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << "---------------------------------------" << endl;
+
+	cout << "VECTOR CLASA ANGAJAT:" << endl;
+
+	Angajat* angajatiVect = new Angajat[2];
+	angajatiVect[0] = angajat2;
+	angajatiVect[1] = angajat3;
+
+	for (int i = 0; i < 2; i++) {
+		cout << angajatiVect[i] << endl;
+	}
+	cout << endl;
+
+	/*for (int i = 0; i < 2; i++) {
+		cin >> angajatiVect[i];
+	}*/
+
+
+	cout << endl << endl;
+	for (int i = 0; i < 2; i++) {
+		cout << angajatiVect[i] << endl;
+	}
+
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << "---------------------------------------" << endl;
+	cout << "VECTOR CLASA FABRICA:" << endl;
+	Fabrica* fabrici = new Fabrica[2];
+	fabrici[0] = fabrica1;
+	fabrici[1] = fabrica4;
+
+	for (int i = 0; i < 2; i++) {
+		cout << fabrici[i] << endl;
+	}
+	cout << endl;
+
+	/*for (int i = 0; i < 2; i++) {
+		cin >> fabrici[i];
+	}*/
+
+
+	cout << endl << endl;
+	for (int i = 0; i < 2; i++) {
+		cout << fabrici[i] << endl;
+	}
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << "---------------------------------------" << endl;
+ const int noRows = 1;
+	const int nrCols = 1;
+	Fabrica matrixFabrica[noRows][nrCols];
+	//for (int i = 0; i < noRows; ++i) {
+	//	for (int j = 0; j < nrCols; ++j) {
+	//		cin >> matrixFabrica[i][j];
+	//	}
+	//}
+
+	for (int i = 0; i < noRows; ++i) {
+		for (int j = 0; j < nrCols; ++j) {
+			cout << matrixFabrica[i][j]<<endl<<endl;
+		}
+	}
+
+
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << "---------------------------------------" << endl;
+	cout << "CLASA NOUA - DEPARTAMENT(HAS A):" << endl;
+	Angajat departamentAngajati[] = { angajat3,angajat5,angajat6 };
+	Departament d;
+	cout << d.getDenumire() << endl;
+	cout << d.getNrAngajati() << endl;
+	for (int i = 0; i < d.getNrAngajati(); i++) {
+		cout << d.getDenumire() << endl;
+
+	}
+	cout << d.getAreSindicat() << endl;
+	d.setDenumire("GeoTehnic");
+	d.setAreSindicat(true);
+	d.setAngajati(2, angajatiVect);
+	cout << d << endl<<endl;
+
+	Departament d1("Transport", 3, departamentAngajati, 0);
+	cout << d1 << endl<<endl;
+
+	Departament d2 = d;
+	cout << d2 << endl << endl;
+
+	d = d1;
+	cout << d << endl << endl;
+	cout << "---------------------------------------" << endl;
+	cout << d1[1] << endl;
+	cout << d1[-3] << endl;
+	cout << "---------------------------------------" << endl;
+	cout << (int)d1 << endl;
+
+}
 	
 
 }
