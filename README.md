@@ -1,6 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 # include <iostream>
-#include< string>
+# include <fstream>
 using namespace std;
 
 class Mobila {
@@ -10,28 +10,6 @@ class Mobila {
 	string material;
 	static int garantie;
 public:
-
-
-	friend istream& operator>>(istream& in, Mobila& m)
-	{
-		cout << " culoarea este:" << endl;
-		in >> ws;
-		char aux[100];
-		in.getline(aux, 99);
-		if (m.culoare != NULL) {
-			delete[]m.culoare;
-		}
-		
-		m.culoare = new char[strlen(aux) + 1];
-		strcpy_s(m.culoare, strlen(aux) + 1, aux);
-		cout << "Are un nr de sertare de: " << endl;
-		in >> m.nrSertare;
-		cout << "Materialul este de" << endl;
-		in >> ws;
-		getline(in, m.material);
-
-		return in;
-	}
 	Mobila() : id(105)
 	{
 		this->nrSertare = 4;
@@ -137,6 +115,40 @@ public:
 		return os;
 	}
 
+
+	friend ofstream& operator<<(ofstream& out, const Mobila& mobila) {
+		out << mobila.culoare << endl;
+		out << mobila.nrSertare << endl;
+		out<< mobila.material << endl;
+		return out;
+	}
+
+	friend istream& operator>>(istream& input, Mobila& mobila) {
+		cout << "Introduceti culoarea: ";
+		char buffer[100];
+		input >> buffer;
+		delete[] mobila.culoare;
+		mobila.culoare = new char[strlen(buffer) + 1];
+		strcpy(mobila.culoare, buffer);
+		cout << "Introduceti numarul de sertare: ";
+		input >> mobila.nrSertare;
+		cout << "Introduceti materialul: ";
+		input >> mobila.material;
+		return input;
+	}
+
+	friend ifstream& operator>>(ifstream& in, Mobila& mobila) 
+	{
+		char buffer[100];
+		in>> buffer;
+		delete[] mobila.culoare;
+		mobila.culoare = new char[strlen(buffer) + 1];
+		strcpy(mobila.culoare, buffer);
+		in >> mobila.nrSertare;
+		in >> mobila.material;
+		return in;
+	}
+
 	bool operator&&(const Mobila& m) {
 		return this->nrSertare == m.nrSertare && this->material == m.material;
 	}
@@ -177,32 +189,6 @@ class Angajat {
 	static int varstaPensionare;
 public:
 
-
-	friend istream& operator>>(istream& in, Angajat& a) 
-	{
-		cout << " Numele angajatului este:" << endl;
-		in >> ws;
-		char aux[100];
-		in.getline(aux, 99);
-		if (a.nume != NULL) {
-			delete[]a.nume;
-		}
-
-		a.nume = new char[strlen(aux) + 1];
-		strcpy_s(a.nume, strlen(aux) + 1, aux);
-		cout << "Varsta angajatului este de: ";
-		in >> a.varsta;
-		cout << " ani" << endl;
-		cout << "Are o vechime de munca de ";
-		in >> a.aniVechime;
-		cout << " ani" << endl;
-		in >> a.eBarbat;
-		cout << "Genul: " << endl;
-		cout<< (a.eBarbat? "E barbat" : "E femeie");
-		cout << endl;
-	
-		return in;
-	}
 	Angajat() :id(223)
 	{
 		this->nume = new char[strlen("Popescu") + 1];
@@ -332,7 +318,21 @@ public:
 		return os;
 	}
 
-
+	friend istream& operator>>(istream& input, Angajat& angajat) {
+		cout << "Introduceti numele: ";
+		char buffer[100];
+		input >> buffer;
+		delete[] angajat.nume;
+		angajat.nume = new char[strlen(buffer) + 1];
+		strcpy(angajat.nume, buffer);
+		cout << "Introduceti varsta: ";
+		input >> angajat.varsta;
+		cout << "Introduceti ani vechime: ";
+		input >> angajat.aniVechime;
+		cout << "Este barbat? (1 pentru da, 0 pentru nu): ";
+		input >> angajat.eBarbat;
+		return input;
+	}
 
 	Angajat operator+(const Angajat& a) {
 		Angajat copie = *this;
@@ -353,6 +353,20 @@ public:
 		return this->varsta;
 	}
 
+	void serializare(string NumeFisier)
+	{
+		ofstream fi(NumeFisier, ios::out | ios::binary);
+		int dimNume = strlen(this->nume);
+		fi.write((char*)&dimNume, sizeof(dimNume));
+		fi.write(this->nume, dimNume + 1);
+
+
+		fi.write((char*)&this->varsta, sizeof(this->varsta));
+		fi.write((char*)&this->aniVechime, sizeof(this->aniVechime));
+		fi.write((char*)this->eBarbat, sizeof(this->eBarbat));
+		fi.close();
+	}
+
 };
 
 int Angajat::varstaPensionare = 65;
@@ -366,32 +380,7 @@ class Fabrica {
 	static int nrTotalFabrici;
 public:
 
-	friend istream& operator>>(istream& in, Fabrica& f) {
 
-		cout << " Locatia fabricii este in:" << endl;
-		in >> ws;
-		char aux[100];
-		in.getline(aux, 99);
-		if (f.locatie != NULL) {
-			delete[]f.locatie;
-		}
-
-		f.locatie = new char[strlen(aux) + 1];
-		strcpy_s(f.locatie, strlen(aux) + 1, aux);
-		cout << "Are o suprafata de ";
-		in >> f.suprafata;
-		cout <<"metrii patrati"<< endl;
-		cout << "Are un nr de angajati de: ";
-		in >> f.nrAngajati;
-		for (int i = 0; i < f.nrAngajati; i++)
-		{
-			cout << " Angajatul " << (i + 1) << " se numeste: " << endl;
-			in >> f.numeAngajati[i];
-		}
-
-
-		return in;
-	}
 	Fabrica() : anInfiintare(1998)
 	{
 		this->locatie = new char[strlen("Necunoscut") + 1];
@@ -477,6 +466,8 @@ public:
 	}
 
 
+
+
 	const int getAnInfiintare() {
 		return anInfiintare;
 	}
@@ -542,6 +533,26 @@ public:
 		return os;
 	}
 
+	friend istream& operator>>(istream& input, Fabrica& fabrica) {
+		cout << "Introduceti locatia fabricii: ";
+		char buffer[100];
+		input >> buffer;
+		delete[] fabrica.locatie;
+		fabrica.locatie = new char[strlen(buffer) + 1];
+		strcpy(fabrica.locatie, buffer);
+		cout << "Introduceti suprafata fabricii: ";
+		input >> fabrica.suprafata;
+		cout << "Introduceti numarul de angajati: ";
+		input >> fabrica.nrAngajati;
+		delete[] fabrica.numeAngajati;
+		fabrica.numeAngajati = new string[fabrica.nrAngajati];
+		for (int i = 0; i < fabrica.nrAngajati; ++i) {
+			cout << "Introduceti numele angajatului " << i + 1 << ": ";
+			input >> fabrica.numeAngajati[i];
+		}
+		return input;
+	}
+
 	Fabrica& operator+=(string numeAngajat) {
 		string* noiNumeAngajati = new string[nrAngajati + 1];
 		for (int i = 0; i < this->nrAngajati; i++) {
@@ -573,6 +584,58 @@ public:
 	bool operator!() {
 		return nrAngajati == 0;
 	}
+
+	//citire ;i scriere in fisiere text
+
+	friend ifstream& operator>>(ifstream& in, Fabrica& fabrica) {
+		char buffer[100];
+		in >> buffer;
+		delete[] fabrica.locatie;
+		fabrica.locatie = new char[strlen(buffer) + 1];
+		strcpy(fabrica.locatie, buffer);
+		in>> fabrica.suprafata;
+		in>> fabrica.nrAngajati;
+		delete[] fabrica.numeAngajati;
+		fabrica.numeAngajati = new string[fabrica.nrAngajati];
+		for (int i = 0; i < fabrica.nrAngajati; ++i) {
+			in >> fabrica.numeAngajati[i];
+		}
+		return in;
+	}
+
+	friend ofstream& operator<<(ofstream& out, const Fabrica& fab) {
+		out << fab.locatie << fab.suprafata << fab.nrAngajati;
+		for (int i = 0; i < fab.nrAngajati; i++)\
+		{
+			out << fab.numeAngajati[i];
+			
+		}
+	
+		return out;
+	}
+
+	void dezerializare(string numeFisier) 
+	{
+		ifstream k(numeFisier, ios::in | ios::binary);
+		if (k.is_open()) 
+		{
+			int dimLocatie = 0;
+			k.read((char*)&dimLocatie, sizeof(dimLocatie));
+			this->locatie = new char[dimLocatie + 1];
+			k.read(this->locatie, dimLocatie + 1);
+
+			k.read((char*)&this->suprafata, sizeof(this->suprafata));
+			k.read((char*)&this->nrAngajati, sizeof(this->nrAngajati));
+
+		}
+		else
+		{
+			cout << "Nu s a gasit fisierul" << endl;
+		}
+
+	}
+
+
 };
 int Fabrica::nrTotalFabrici = 1;
 
@@ -628,7 +691,8 @@ public:
 
 		this->areSindicat = d.areSindicat;
 	}
- // Operator de atribuire
+
+	// Operator de atribuire
 	Departament& operator=(const Departament& d) {
 		if (this != &d) {
 			delete[] this->angajati;
@@ -652,17 +716,60 @@ public:
 		out << "Numar angajati: " << d.nrAngajati << endl;
 		out << "Angajati: " << endl;
 		for (int i = 0; i < d.nrAngajati; i++) {
-			out << d.angajati[i]<<endl<<endl;
+			out << d.angajati[i] << endl << endl;
 		}
 		out << endl << endl;
 		out << "Are sindicat:(1-Da sau 0-Nu) " << d.areSindicat << endl;
 		return out;
 	}
- string getDenumire()  {
+
+
+
+
+	void scriere(string NumeFis)
+	{
+		ofstream F(NumeFis, ios::out | ios::binary);
+		int dimDenumire = this->denumire.size();
+		F.write((char*)&dimDenumire, sizeof(dimDenumire));
+		F.write(this->denumire.c_str(), dimDenumire + 1);
+		F.write((char*)&this->nrAngajati, sizeof(this->nrAngajati));
+		F.write((char*)&this->areSindicat, sizeof(this->areSindicat));
+		F.close();
+
+
+
+	}
+
+	void citire(string numefis)
+	{
+		ifstream h(numefis, ios::in | ios::binary);
+		if (h.is_open())
+		{
+			int dimDen = 0;
+			h.read((char*)&dimDen, sizeof(dimDen));
+			char* aux = new char[dimDen + 1];
+			h.read(aux, dimDen + 1);
+			this->denumire = aux;
+			delete[] aux;
+
+			h.read((char*)&this->nrAngajati, sizeof(this->nrAngajati));
+			h.read((char*)&this->areSindicat, sizeof(this->areSindicat));
+
+
+
+		}
+		else {
+			cout << "Fisierul cautat nu exista!" << endl;
+		}
+
+
+	}
+
+	string getDenumire() {
 		return this->denumire;
 	}
 
-	void setDenumire( string denumire) {
+	void setDenumire(string denumire) {
 		this->denumire = denumire;
 	}
 
@@ -690,7 +797,8 @@ public:
 	void setAreSindicat(bool areSindicat) {
 		this->areSindicat = areSindicat;
 	}
-Angajat operator[](int index) {
+
+	Angajat operator[](int index) {
 		if (index >= 0 && index < this->nrAngajati)
 		{
 			return this->angajati[index];
@@ -705,6 +813,7 @@ Angajat operator[](int index) {
 		return this->nrAngajati;
 	}
 };
+
 
 
 void main()
@@ -1001,56 +1110,6 @@ void main()
 	cout << endl << endl << endl << endl;
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
-	
-cout << "VECTOR CLASA MOBILA:" << endl;
-	Mobila* mobilaVect = new Mobila[2];
-	mobilaVect[0] = mobila2;
-	mobilaVect[1] = mobila3;
-
-	for (int i = 0; i < 2; i++) {
-		cout << mobilaVect[i] << endl;
-	}
-	cout << endl;
-
-	/*for (int i = 0; i < 2; i++) {
-		cin >> mobilaVect[i];
-	}*/
-
-
-	cout << endl << endl;
-	for (int i = 0; i < 2; i++) {
-		cout << mobilaVect[i] << endl;
-	}
-
-	cout << "---------------------------------------" << endl;
-	cout << endl << endl;
-	cout << endl << endl;
-	cout << endl << endl;
-	cout << "---------------------------------------" << endl;
-
-	cout << "VECTOR CLASA ANGAJAT:" << endl;
-
-	Angajat* angajatiVect = new Angajat[2];
-	angajatiVect[0] = angajat2;
-	angajatiVect[1] = angajat3;
-
-	for (int i = 0; i < 2; i++) {
-		cout << angajatiVect[i] << endl;
-	}
-	cout << endl;
-
-	/*for (int i = 0; i < 2; i++) {
-		cin >> angajatiVect[i];
-	}*/
-
-
-	cout << endl << endl;
-	for (int i = 0; i < 2; i++) {
-		cout << angajatiVect[i] << endl;
-	}
-
-	cout << "---------------------------------------" << endl;
-	cout << endl << endl;
 	cout << endl << endl;
 	cout << endl << endl;
 	cout << "---------------------------------------" << endl;
@@ -1078,7 +1137,60 @@ cout << "VECTOR CLASA MOBILA:" << endl;
 	cout << endl << endl;
 	cout << endl << endl;
 	cout << "---------------------------------------" << endl;
- const int noRows = 1;
+	cout << "VECTOR CLASA ANGAJAT:" << endl;
+
+	Angajat* angajatiVect = new Angajat[2];
+	angajatiVect[0] = angajat2;
+	angajatiVect[1] = angajat3;
+
+	for (int i = 0; i < 2; i++) {
+		cout << angajatiVect[i] << endl;
+	}
+	cout << endl;
+
+	/*for (int i = 0; i < 2; i++) {
+		cin >> angajatiVect[i];
+	}*/
+
+
+	cout << endl << endl;
+	for (int i = 0; i < 2; i++) {
+		cout << angajatiVect[i] << endl;
+	}
+
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << "---------------------------------------" << endl;
+	cout << "VECTOR CLASA MOBILA:" << endl;
+	Mobila* mobilaVect = new Mobila[2];
+	mobilaVect[0] = mobila2;
+	mobilaVect[1] = mobila3;
+
+	for (int i = 0; i < 2; i++) {
+		cout << mobilaVect[i] << endl;
+	}
+	cout << endl;
+
+	/*for (int i = 0; i < 2; i++) {
+		cin >> mobilaVect[i];
+	}*/
+
+
+	cout << endl << endl;
+	for (int i = 0; i < 2; i++) {
+		cout << mobilaVect[i] << endl;
+	}
+
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << endl << endl;
+	cout << "---------------------------------------" << endl;
+
+
+	const int noRows = 1;
 	const int nrCols = 1;
 	Fabrica matrixFabrica[noRows][nrCols];
 	//for (int i = 0; i < noRows; ++i) {
@@ -1089,7 +1201,7 @@ cout << "VECTOR CLASA MOBILA:" << endl;
 
 	for (int i = 0; i < noRows; ++i) {
 		for (int j = 0; j < nrCols; ++j) {
-			cout << matrixFabrica[i][j]<<endl<<endl;
+			cout << matrixFabrica[i][j] << endl << endl;
 		}
 	}
 
@@ -1112,10 +1224,10 @@ cout << "VECTOR CLASA MOBILA:" << endl;
 	d.setDenumire("GeoTehnic");
 	d.setAreSindicat(true);
 	d.setAngajati(2, angajatiVect);
-	cout << d << endl<<endl;
+	cout << d << endl << endl;
 
 	Departament d1("Transport", 3, departamentAngajati, 0);
-	cout << d1 << endl<<endl;
+	cout << d1 << endl << endl;
 
 	Departament d2 = d;
 	cout << d2 << endl << endl;
@@ -1127,8 +1239,64 @@ cout << "VECTOR CLASA MOBILA:" << endl;
 	cout << d1[-3] << endl;
 	cout << "---------------------------------------" << endl;
 	cout << (int)d1 << endl;
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << " FISIERE TEXT CITIRE SI AFISARE FABRICA";
 
-}
-	
+	ofstream f("Fabrica.txt", ios::out);
+	f << fabrica5;
+	f.close();
+
+	Fabrica fab;
+	ifstream g("Fabrica.txt", ios::in);
+	if (g.is_open())
+	{
+		g >> fab;
+		cout << "Obiectul a fost citit din fisier" << endl;
+	}
+
+	else
+	{
+		cout << "Fisierul cautat nu exista!" << endl;
+	}
+	cout << fab << endl;
+
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << " FISIERE TEXT CITIRE SI AFISARE MOBILA";
+
+	ofstream fis("Mobila.txt", ios::out);
+	fis<< mobila2;
+	fis.close();
+
+	Mobila m1;
+	ifstream gfis("Mobila.txt", ios::in);
+	if (gfis.is_open()) 
+	{
+		gfis >> m1;
+		cout << " S-a putut citi din fisier" << endl;
+
+		
+	}
+	else
+	{
+		cout << " Nu s-a putut citi din fisier" << endl;
+	}
+	cout << m1 << endl;
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << " FISIERE BINARE CITIRE SI AFISARE~ ANGAJAT";
+	angajat2.serializare("Angajat.bin");
+	angajat2.serializare("Angajat.bin");
+	cout << angajat2 << endl;
+	cout << "Obiectul a fost scris in binar!" << endl;
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+
+	cout << " FISIERE BINARE CITIRE SI AFISARE~ DEPARTAMENT";
+	Departament dep;
+	dep.scriere("Deparatament.bin");
+	dep.citire("Departament.bin");
+	cout << dep << endl;
 
 }
