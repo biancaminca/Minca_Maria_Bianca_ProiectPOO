@@ -248,15 +248,16 @@ public:
 	}
 
 	Angajat& operator=(const Angajat& a) {
-		if (this != &a) {
+		if (this != &a)
+		{
 			if (this->nume != NULL) {
 				delete[]this->nume;
 			}
 			this->nume = new char[strlen(a.nume) + 1];
 			strcpy_s(this->nume, strlen(a.nume) + 1, a.nume);
-			varsta = a.varsta;
-			aniVechime = a.aniVechime;
-			eBarbat = a.eBarbat;
+			this->varsta = a.varsta;
+			this->aniVechime = a.aniVechime;
+			this->eBarbat = a.eBarbat;
 		}
 		return *this;
 	}
@@ -363,7 +364,7 @@ public:
 
 		fi.write((char*)&this->varsta, sizeof(this->varsta));
 		fi.write((char*)&this->aniVechime, sizeof(this->aniVechime));
-		fi.write((char*)this->eBarbat, sizeof(this->eBarbat));
+		fi.write((char*)& this->eBarbat, sizeof(this->eBarbat));
 		fi.close();
 	}
 
@@ -812,9 +813,131 @@ public:
 	explicit operator int() {
 		return this->nrAngajati;
 	}
+
+	
+	
+
 };
 
+class FabricaDeLemn:public Fabrica
+{ 
+	string calitateLemn;
+	bool areUtilajeBuneDePrelucrare;
 
+public:
+	FabricaDeLemn() :Fabrica()
+	{
+		this->calitateLemn = " Foarte Buna";
+		this->areUtilajeBuneDePrelucrare = true;
+
+	}
+
+	FabricaDeLemn(string calitateLemn, bool areUtilajeBuneDePrelucare) : Fabrica("Deva")
+	{
+		this->calitateLemn = calitateLemn;
+		this->areUtilajeBuneDePrelucrare = areUtilajeBuneDePrelucare;
+
+	}
+
+	~FabricaDeLemn() 
+	{ 
+
+	}
+
+	string getCalitateLemn() {
+		return this->calitateLemn;
+	}
+	bool getAreUtilajeBuneDePrelucrare() {
+		return this->areUtilajeBuneDePrelucrare;
+	}
+	void setCalitateLemn(string calitateLemn) {
+		this->calitateLemn = calitateLemn;
+	}
+	void setAreUtilajeBuneDePrelucrare(bool areUtilajeBuneDePrelucrare) 
+	{
+		this->areUtilajeBuneDePrelucrare = areUtilajeBuneDePrelucrare;
+
+	}
+	FabricaDeLemn(const FabricaDeLemn& f) :Fabrica (f)
+	{
+
+		this->calitateLemn = f.calitateLemn;
+		this->areUtilajeBuneDePrelucrare = f.areUtilajeBuneDePrelucrare;
+
+	}
+	FabricaDeLemn& operator=(const FabricaDeLemn& f) 
+	{
+		if (this != &f)
+		{
+			Fabrica::operator=(f);
+			this->calitateLemn = f.calitateLemn;
+			this->areUtilajeBuneDePrelucrare = f.areUtilajeBuneDePrelucrare;
+		}
+			return *this;
+		
+	}
+};
+class MobilaCuModel: public Mobila 
+{
+	string  tipModel;
+	bool areCerereMare;
+public:
+
+	MobilaCuModel() :Mobila()
+	{
+		this->tipModel = " Cu floricele";
+		this->areCerereMare = false;
+
+	}
+
+	MobilaCuModel(string tipModel, bool areCerereMare) :Mobila(3, "lemn")
+	{ 
+		this->tipModel = tipModel;
+		this->areCerereMare = areCerereMare;
+	}
+
+
+	~MobilaCuModel() {
+
+	}
+
+	MobilaCuModel(const MobilaCuModel& m) :Mobila(m)  //constr copiere
+	{
+		this->tipModel = m.tipModel;
+		this->areCerereMare = m.areCerereMare;
+	}
+
+	//operator =
+
+	MobilaCuModel& operator=(const MobilaCuModel& m) 
+	{    
+		if(this!=&m)
+
+	    {
+		Mobila::operator=(m);
+		this->tipModel = m.tipModel;
+		this->areCerereMare = m.areCerereMare;
+	    }
+		return *this;
+		
+	}
+
+	string getTipModel() {
+		return this->tipModel;
+	}
+	bool getAreCerereMare() {
+		return this->areCerereMare;
+	}
+
+
+	void setTipModel(string tipModel) {
+		this->tipModel = tipModel;
+	}
+
+	void setAreCerereMare(bool areCerereMare) {
+		this->areCerereMare = areCerereMare;
+	}
+};
 
 void main()
 {
@@ -1285,18 +1408,65 @@ void main()
 	cout << m1 << endl;
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
+	
+
 	cout << " FISIERE BINARE CITIRE SI AFISARE~ ANGAJAT";
-	angajat2.serializare("Angajat.bin");
-	angajat2.serializare("Angajat.bin");
-	cout << angajat2 << endl;
-	cout << "Obiectul a fost scris in binar!" << endl;
+	
+	//angajat2.serializare("Angajat.bin");
+	//Angajat angj;
+	//cout << angj << endl;
+	//
+	//cout << angajat2 << endl;
+	//return 0;
+	//cout << "Obiectul a fost scris in binar!" << endl;
+	//cout << "---------------------------------------" << endl;
+	//cout << endl << endl;
+	//
+	//cout << " FISIERE BINARE CITIRE SI AFISARE~ DEPARTAMENT";
+	//Departament dep;
+	//dep.scriere("Deparatament.bin");
+	//dep.citire("Departament.bin");
+	//cout << dep << endl;
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
+	cout << " RELATIE IS-A PENTRU CLASA FABRICA: " << endl<<endl;
+	FabricaDeLemn f1;
+	FabricaDeLemn f2("Buna", true);
+	FabricaDeLemn f3 = f1;
+	cout << "f3:" << endl;
+	cout << f3.getCalitateLemn() << endl;
+	cout << f3.getAreUtilajeBuneDePrelucrare() << endl;
+	f3.setCalitateLemn("rea");
+	f3.setAreUtilajeBuneDePrelucrare(false);
+	cout << "f3 MODIFICAT:" << endl;
+	cout << f3.getCalitateLemn() << endl;
+	cout << f3.getAreUtilajeBuneDePrelucrare() << endl;
+	FabricaDeLemn f4;
+	f4 = f2;
+	cout << "f4:" << endl;
+	cout << f4.getCalitateLemn() << endl;
+	cout << f4.getAreUtilajeBuneDePrelucrare() << endl;
 
-	cout << " FISIERE BINARE CITIRE SI AFISARE~ DEPARTAMENT";
-	Departament dep;
-	dep.scriere("Deparatament.bin");
-	dep.citire("Departament.bin");
-	cout << dep << endl;
+
+	cout << " RELATIE IS-A PENTRU CLASA MOBILA: " << endl << endl;
+	MobilaCuModel m;
+	MobilaCuModel mob("Cu picatele", false);
+	MobilaCuModel mob2 = mob;
+	cout << "Mobila 3 cu model" << endl;
+	cout << mob2.getTipModel() << endl;
+	cout << mob2.getAreCerereMare() << endl;
+	cout << "-------------------------------" << endl;
+	mob2.setTipModel("Model simplu");
+	mob2.setAreCerereMare(true);
+	cout << mob2.getTipModel() << endl;
+	cout << mob2.getAreCerereMare() << endl;
+	cout << "-------------------------------" << endl;
+	MobilaCuModel mob3;
+	mob3 = mob2;
+	cout << mob3.getTipModel() << endl;
+	cout << mob3.getAreCerereMare() << endl;
+	cout << "-------------------------------" << endl;
+
+
 
 }
