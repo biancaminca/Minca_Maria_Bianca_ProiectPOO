@@ -1,15 +1,34 @@
 #define _CRT_SECURE_NO_WARNINGS
 # include <iostream>
+#include<string>
 # include <fstream>
 using namespace std;
 
-class Mobila {
+class Detalii {
+public:
+	virtual string detalii() = 0;
+};
+
+class Entitate {
+public: 
+	virtual string tipEntitate() = 0;
+};
+
+class Mobila :public Detalii, public Entitate {
 	const int id;
 	char* culoare;
 	int nrSertare;
 	string material;
 	static int garantie;
 public:
+
+	string detalii() {
+		return "Mobila este una de calitate, venita din Elvetia";
+	}
+	string tipEntitate() {
+		return "Acesta este o mobila";
+	}
+
 	Mobila() : id(105)
 	{
 		this->nrSertare = 4;
@@ -54,7 +73,9 @@ public:
 			delete[]this->culoare;
 		}
 	}
-
+	virtual string detaliiSuplimentare() {
+		return "Nu se poate preciza nimic";
+	}
 	Mobila& operator=(const Mobila& m) {
 		if (this != &m) {
 			this->nrSertare = m.nrSertare;
@@ -116,12 +137,7 @@ public:
 	}
 
 
-	friend ofstream& operator<<(ofstream& out, const Mobila& mobila) {
-		out << mobila.culoare << endl;
-		out << mobila.nrSertare << endl;
-		out<< mobila.material << endl;
-		return out;
-	}
+
 
 	friend istream& operator>>(istream& input, Mobila& mobila) {
 		cout << "Introduceti culoarea: ";
@@ -137,16 +153,53 @@ public:
 		return input;
 	}
 
-	friend ifstream& operator>>(ifstream& in, Mobila& mobila) 
-	{
-		char buffer[100];
-		in>> buffer;
-		delete[] mobila.culoare;
-		mobila.culoare = new char[strlen(buffer) + 1];
-		strcpy(mobila.culoare, buffer);
-		in >> mobila.nrSertare;
-		in >> mobila.material;
-		return in;
+	void serializare(string MobilaFisier) {
+		ofstream f(MobilaFisier, ios::out | ios::binary);
+		//pt char*
+		int dimCuloare = strlen(this->culoare);
+		f.write((char*)&dimCuloare, sizeof(dimCuloare));
+		f.write(this->culoare, dimCuloare + 1);
+
+		// pt numerice
+		f.write((char*)&this->nrSertare, sizeof(this->nrSertare));
+
+		//pt string
+		int dimMaterial = this->material.size();
+		f.write((char*)&dimMaterial, sizeof(dimMaterial));
+		f.write(this->material.c_str(), dimMaterial + 1);
+		f.close();
+	}
+	void deserializare(string MobilaFisier) {
+		ifstream f(MobilaFisier, ios::in | ios::binary);
+		if (f.is_open())
+		{
+			if (this->culoare != NULL) {
+				delete[]this->culoare;
+			}
+	
+
+			//pt char*
+			int dimCuloare = 0;
+			f.read((char*)&dimCuloare, sizeof(dimCuloare));
+			this->culoare = new char[dimCuloare + 1];
+			f.read(this->culoare, dimCuloare + 1);
+
+			// pt numerice
+			f.read((char*)&this->nrSertare, sizeof(this->nrSertare));
+			
+			//pt string
+			int dimMaterial = 0;
+			f.read((char*)&dimMaterial, sizeof(dimMaterial));
+			char* aux = new char[dimMaterial + 1];
+			f.read(aux, dimMaterial + 1);//+1 este pentru terminatorul de sir
+			this->material = aux;
+			delete[]aux;
+			f.close();
+
+		}
+		else {
+			cout << "Fisierul cautat nu exista!" << endl;
+		}
 	}
 
 	bool operator&&(const Mobila& m) {
@@ -180,7 +233,7 @@ void emitereFactura(Mobila m) {
 	cout << "****************************************" << endl;
 }
 
-class Angajat {
+class Angajat: public Detalii, public Entitate {
 	const int id;
 	char* nume;
 	int varsta;
@@ -188,6 +241,14 @@ class Angajat {
 	bool eBarbat;
 	static int varstaPensionare;
 public:
+
+	string detalii() {
+		return "Angajatul este unul muncitor";
+	}
+	string tipEntitate() {
+		return "Acesta este un angajat";
+	}
+
 
 	Angajat() :id(223)
 	{
@@ -227,11 +288,7 @@ public:
 	}
 
 
-	void afisare() {
-		cout << "Angajatul cu numele de " << nume << " in varsta de " << varsta << ", are " << aniVechime << " ani vechime si  " << (this->eBarbat ? "e Barbat" : "e Femeie") << endl;
-		cout << "Angajatul mai are  de munca inca " << (this->eBarbat ? 65 - varsta : 60 - varsta) << " pana la pensionare!" << endl;
-	}
-
+	
 
 	Angajat(const Angajat& a) :id(a.id) {
 		this->nume = new char[strlen(a.nume) + 1];
@@ -372,7 +429,7 @@ public:
 
 int Angajat::varstaPensionare = 65;
 
-class Fabrica {
+class Fabrica:public Detalii, public Entitate {
 	const int anInfiintare;
 	char* locatie;
 	float suprafata;
@@ -381,7 +438,12 @@ class Fabrica {
 	static int nrTotalFabrici;
 public:
 
-
+	string detalii() {
+		return "Fabrica merge foarte bine";
+	}
+	string tipEntitate() {
+		return "Acesta este o fabrica";
+	}
 	Fabrica() : anInfiintare(1998)
 	{
 		this->locatie = new char[strlen("Necunoscut") + 1];
@@ -586,7 +648,7 @@ public:
 		return nrAngajati == 0;
 	}
 
-	//citire ;i scriere in fisiere text
+	//citire si scriere in fisiere text
 
 	friend ifstream& operator>>(ifstream& in, Fabrica& fabrica) {
 		char buffer[100];
@@ -725,46 +787,43 @@ public:
 	}
 
 
-
-
-	void scriere(string NumeFis)
+	friend ofstream& operator<<(ofstream& out, const Departament& d) {
+		out  << d.denumire << endl;
+		out  << d.nrAngajati << endl;
+		
+		for (int i = 0; i < d.nrAngajati; i++) {
+			out << d.angajati[i] << endl << endl;
+		}
+		
+		out << d.areSindicat << endl;
+		return out;
+	}
+	friend ifstream& operator>>(ifstream& in, Departament& d) 
 	{
-		ofstream F(NumeFis, ios::out | ios::binary);
-		int dimDenumire = this->denumire.size();
-		F.write((char*)&dimDenumire, sizeof(dimDenumire));
-		F.write(this->denumire.c_str(), dimDenumire + 1);
-		F.write((char*)&this->nrAngajati, sizeof(this->nrAngajati));
-		F.write((char*)&this->areSindicat, sizeof(this->areSindicat));
-		F.close();
+		in >> ws;
+		getline(in, d.denumire);
 
-
+		in >> d.nrAngajati;
+		if (d.angajati != NULL) {
+			delete[]d.angajati;
+		}
+		d.angajati = new Angajat[d.nrAngajati];
+		for (int i = 0; i < d.nrAngajati; i++) {
+			in >> d.angajati[i];
+		}
+		in >> d.areSindicat;
+		return in;
 
 	}
 
-	void citire(string numefis)
-	{
-		ifstream h(numefis, ios::in | ios::binary);
-		if (h.is_open())
-		{
-			int dimDen = 0;
-			h.read((char*)&dimDen, sizeof(dimDen));
-			char* aux = new char[dimDen + 1];
-			h.read(aux, dimDen + 1);
-			this->denumire = aux;
-			delete[] aux;
-
-			h.read((char*)&this->nrAngajati, sizeof(this->nrAngajati));
-			h.read((char*)&this->areSindicat, sizeof(this->areSindicat));
+	
 
 
 
-		}
-		else {
-			cout << "Fisierul cautat nu exista!" << endl;
-		}
+	
 
-
-	}
+	
+	
 
 	string getDenumire() {
 		return this->denumire;
@@ -906,7 +965,7 @@ public:
 		this->tipModel = m.tipModel;
 		this->areCerereMare = m.areCerereMare;
 	}
-
+	
 	//operator =
 
 	MobilaCuModel& operator=(const MobilaCuModel& m) 
@@ -960,16 +1019,16 @@ void main()
 
 
 	Angajat angajat;
-	angajat.afisare();
+	cout << angajat;
 	cout << endl;
 
 	Angajat angajat2(234, 7);
-	angajat2.afisare();
+	cout << angajat2;
 	cout << endl;
 
 
 	Angajat angajat3("Viorel", 31);
-	angajat3.afisare();
+	cout << angajat3;
 	cout << endl;
 	cout << endl << endl << endl << endl;
 
@@ -1100,7 +1159,7 @@ void main()
 
 	cout << "CONSTRUCTOR DE COPIERE CLASA ANGAJAT:" << endl;
 	Angajat angajat4 = angajat3;
-	angajat4.afisare();
+	cout << angajat4;
 	cout << endl << endl;
 
 
@@ -1386,50 +1445,56 @@ void main()
 
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
-	cout << " FISIERE TEXT CITIRE SI AFISARE MOBILA";
+	cout << " FISIERE TEXT CITIRE SI AFISARE DEPARTAMENT";
 
-	ofstream fis("Mobila.txt", ios::out);
-	fis<< mobila2;
+	ofstream fis("Departament.txt", ios::out);
+	fis << d2;
 	fis.close();
 
-	Mobila m1;
-	ifstream gfis("Mobila.txt", ios::in);
-	if (gfis.is_open()) 
+	Departament d3;
+	ifstream gfis("Departament.txt", ios::in);
+	if (gfis.is_open())
 	{
-		gfis >> m1;
+		gfis >> d3;
 		cout << " S-a putut citi din fisier" << endl;
 
-		
+
 	}
 	else
 	{
 		cout << " Nu s-a putut citi din fisier" << endl;
 	}
-	cout << m1 << endl;
+	cout << d3 << endl;
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
-	
+
 
 	cout << " FISIERE BINARE CITIRE SI AFISARE~ ANGAJAT";
+
+	angajat2.serializare("Angajat.bin");
+	cout << "Obiectul a fost scris in binar!" << endl;
+	Angajat angj;
+	cout << angj << endl;
+	cout << angajat2 << endl;
 	
-	//angajat2.serializare("Angajat.bin");
-	//Angajat angj;
-	//cout << angj << endl;
-	//
-	//cout << angajat2 << endl;
-	//return 0;
-	//cout << "Obiectul a fost scris in binar!" << endl;
-	//cout << "---------------------------------------" << endl;
-	//cout << endl << endl;
-	//
-	//cout << " FISIERE BINARE CITIRE SI AFISARE~ DEPARTAMENT";
-	//Departament dep;
-	//dep.scriere("Deparatament.bin");
-	//dep.citire("Departament.bin");
-	//cout << dep << endl;
+	
 	cout << "---------------------------------------" << endl;
 	cout << endl << endl;
-	cout << " RELATIE IS-A PENTRU CLASA FABRICA: " << endl<<endl;
+	
+	cout << " FISIERE BINARE CITIRE SI AFISARE~ MOBILA";
+
+
+	mobila.serializare("Mobila.bin");
+	cout << "Obiectul a fost scris in binar!" << endl;
+	Mobila mobila8;
+	mobila8.deserializare("Mobila.bin");
+	cout << mobila8 << endl;
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+
+	cout << "---------------------------------------" << endl;
+	cout << endl << endl;
+	cout << " RELATIE IS-A PENTRU CLASA FABRICA: " << endl << endl;
 	FabricaDeLemn f1;
 	FabricaDeLemn f2("Buna", true);
 	FabricaDeLemn f3 = f1;
@@ -1466,7 +1531,41 @@ void main()
 	cout << mob3.getTipModel() << endl;
 	cout << mob3.getAreCerereMare() << endl;
 	cout << "-------------------------------" << endl;
+	cout << " Functii VIRTUALE/ABSTRACTE" << endl;
+	cout << "-------------------------------" << endl;
+	cout << endl << endl;
+	Detalii* det[10];
+	Entitate* ent[10];
+	ent[0] = new Mobila(mobila2);
+	ent[1] = new Angajat(angajat4);
+	ent[2] = new Fabrica(fabrica1);
+	ent[3] = new Mobila(mobila2);
+	ent[4] = new Angajat(angajat2);
+	ent[5] = new Mobila(mobila3);
+	ent[6] = new Angajat(angajat3);
+	ent[7] = new Fabrica(fabrica2);
+	ent[8] = new Angajat(angajat4);
+	ent[9] = new Mobila(mobila5);
+	det[0] = new Mobila(mobila2);
+	det[1] = new Angajat(angajat4);
+	det[2] = new Fabrica(fabrica1);
+	det[3] = new Mobila(mobila2);
+	det[4] = new Angajat(angajat2);
+	det[5] = new Mobila(mobila3);
+	det[6] = new Angajat(angajat3);
+	det[7] = new Fabrica(fabrica2);
+	det[8] = new Angajat(angajat4);
+	det[9] = new Mobila(mobila5);
+	for (int i = 0; i < 10; i++)
+	{
+		cout << ent[i]->tipEntitate() << endl;
+		cout << det[i]->detalii() << endl;
+	}
+	
+		
 
 
+	
 
+	
 }
